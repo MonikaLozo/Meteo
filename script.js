@@ -6,25 +6,35 @@ function searchCity(event) {
   let h1 = document.querySelector("h1");
   h1.innerHTML = cityName;
   let apiUrl = `https://api.shecodes.io/weather/v1/current?query=${cityName}&key=${apiKey}&units=metric`;
-  axios.get(apiUrl).then(displayTemperature);
+  axios.get(apiUrl).then(displayWeather);
 }
 let apiKey = "684co3fe49773dbfcf353105adtfdab1";
 
-function displayTemperature(response) {
-  console.log(response.data.temperature.current);
+function displayWeather(response) {
+  console.log(response.data);
+
   let temperatureElement = document.querySelector("#temperature");
-  let temperature = Math.round(response.data.temperature.current);
-  temperatureElement.textContent = temperature;
+  temperatureElement.innerHTML = Math.round(response.data.temperature.current);
+
+  let descriptionElement = document.querySelector("#description");
+  descriptionElement.innerHTML = response.data.condition.description;
+
+  let humidityElement = document.querySelector("#humidity");
+  humidityElement.innerHTML = ` ${response.data.temperature.humidity}%`;
+
+  let windSpeedElement = document.querySelector("#wind-speed");
+  windSpeedElement.innerHTML = ` ${response.data.wind.speed} km/h`;
+
+  let date = new Date(response.data.time * 1000);
+  let timeElement = document.querySelector("#time");
+  timeElement.innerHTML = formatDate(date);
+
+  let iconElement = document.querySelector("#icon");
+  iconElement.innerHTML = `<img src="${response.data.condition.icon_url}" class ="current-temperature-icon" />`;
 }
-
-let cityForm = document.querySelector("form");
-cityForm.addEventListener("submit", searchCity);
-
-let timeElement = document.querySelector(".current-weather .time");
-
-function updateCurrentDate() {
-  let now = new Date();
-
+function formatDate(date) {
+  let minutes = date.getMinutes();
+  let hours = date.getHours();
   let days = [
     "Sunday",
     "Monday",
@@ -34,22 +44,12 @@ function updateCurrentDate() {
     "Friday",
     "Saturday",
   ];
-
-  let day = days[now.getDay()];
-  let hour = now.getHours();
-  let minutes = now.getMinutes();
+  let day = days[date.getDay()];
 
   if (minutes < 10) {
     minutes = `0${minutes}`;
   }
-
-  if (hour < 10) {
-    hour = `0${hour}`;
-  }
-
-  let formattedTime = `${day} ${hour}:${minutes}`;
-  timeElement.textContent = formattedTime;
+  return ` ${day} ${hours}:${minutes}`;
 }
-
-updateCurrentDate();
-setInterval(updateCurrentDate, 60000);
+let cityForm = document.querySelector("form");
+cityForm.addEventListener("submit", searchCity);
